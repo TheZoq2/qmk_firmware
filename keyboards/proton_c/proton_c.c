@@ -17,6 +17,9 @@
 #include "proton_c.h"
 
 void matrix_init_kb(void) {
+  ws2812_init();
+  ws2812_setled_all(255, 0, 0);
+
   // Turn status LED on
   setPinOutput(C13);
   writePinHigh(C13);
