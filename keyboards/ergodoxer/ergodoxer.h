@@ -11,6 +11,7 @@
 // This is undefined in the code copied from ergodox_ez. Most boards seems to define
 // it as 0, so i'll just do that too
 #define I2C_WRITE 0
+#define I2C_READ 1
 
 // I2C aliases and register addresses (see "mcp23018.md")
 #define I2C_ADDR        0b0100000

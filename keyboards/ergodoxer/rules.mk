@@ -1,10 +1,14 @@
-MCU = STM32F303
+SRC += matrix.c i2c_master.c
 
-src += matrix.c
+MCU = STM32F303
 
 # Build Options
 #   comment out to disable the options.
 #
+
+# For IO expander
+CUSTOM_MATRIX = yes
+
 BACKLIGHT_ENABLE = no
 BOOTMAGIC_ENABLE = yes  # Virtual DIP switch configuration
 ## (Note that for BOOTMAGIC on Teensy LC you have to use a custom .ld script.)

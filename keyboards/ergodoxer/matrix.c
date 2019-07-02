@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdint.h>
 #include <stdbool.h>
-#include <avr/io.h>
+// #include <avr/io.h>
 #include "wait.h"
 #include "action_layer.h"
 #include "print.h"
@@ -34,8 +34,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef DEBUG_MATRIX_SCAN_RATE
 #  include "timer.h"
 #endif
-
-#error "Test"
 
 /*
  * This constant define not debouncing time in msecs, assuming eager_pr.
@@ -144,7 +142,6 @@ uint8_t matrix_scan(void) {
         print("left side not responding\n");
       } else {
         print("left side attached\n");
-        ergodox_blink_all_leds();
       }
     }
   }
@@ -240,14 +237,18 @@ static matrix_row_t read_cols(uint8_t row) {
       return 0;
     } else {
       uint8_t data    = 0;
-      mcp23018_status = i2c_start(I2C_ADDR_WRITE, ERGODOX_EZ_I2C_TIMEOUT);
-      if (mcp23018_status) goto out;
-      mcp23018_status = i2c_write(GPIOB_, ERGODOX_EZ_I2C_TIMEOUT);
-      if (mcp23018_status) goto out;
-      mcp23018_status = i2c_start(I2C_ADDR_READ, ERGODOX_EZ_I2C_TIMEOUT);
-      if (mcp23018_status) goto out;
-      mcp23018_status = i2c_read_nack(ERGODOX_EZ_I2C_TIMEOUT);
-      if (mcp23018_status < 0) goto out;
+      // GPIOB_ is a defined literal that can't be pointed to
+      uint8_t reg = GPIOB_;
+      mcp23018_status = i2c_readReg(I2C_ADDR_READ, &reg, &data, 1, ERGODOX_EZ_I2C_TIMEOUT);
+      // mcp23018_status = i2c_start(I2C_ADDR_WRITE, ERGODOX_EZ_I2C_TIMEOUT);
+      // if (mcp23018_status) goto out;
+      // mcp23018_status = i2c_write(GPIOB_, ERGODOX_EZ_I2C_TIMEOUT);
+      // if (mcp23018_status) goto out;
+      // mcp23018_status = i2c_start(I2C_ADDR_READ, ERGODOX_EZ_I2C_TIMEOUT);
+      // if (mcp23018_status) goto out;
+      // mcp23018_status = i2c_read_nack(ERGODOX_EZ_I2C_TIMEOUT);
+      // if (mcp23018_status < 0) goto out;
+      if(mcp23018_status < 0) goto out;
       data            = ~((uint8_t)mcp23018_status);
       mcp23018_status = I2C_STATUS_SUCCESS;
     out:
@@ -263,6 +264,7 @@ static matrix_row_t read_cols(uint8_t row) {
 
     // return ~((PINF & 0x03) | ((PINF & 0xF0) >> 2));
     // TODO: Read cols on local
+      return 0;
   }
 }
 
@@ -300,13 +302,20 @@ static void select_row(uint8_t row) {
     } else {
       // set active row low  : 0
       // set other rows hi-Z : 1
-      mcp23018_status = i2c_start(I2C_ADDR_WRITE, ERGODOX_EZ_I2C_TIMEOUT);
-      if (mcp23018_status) goto out;
-      mcp23018_status = i2c_write(GPIOA_, ERGODOX_EZ_I2C_TIMEOUT);
-      if (mcp23018_status) goto out;
-      mcp23018_status = i2c_write(0xFF & ~(1 << row), ERGODOX_EZ_I2C_TIMEOUT);
-      if (mcp23018_status) goto out;
-    out:
+
+      // mcp23018_status = i2c_start(I2C_ADDR_WRITE, ERGODOX_EZ_I2C_TIMEOUT);
+      // if (mcp23018_status) goto out;
+      // mcp23018_status = i2c_write(GPIOA_, ERGODOX_EZ_I2C_TIMEOUT);
+      // if (mcp23018_status) goto out;
+      // mcp23018_status = i2c_write(0xFF & ~(1 << row), ERGODOX_EZ_I2C_TIMEOUT);
+      // if (mcp23018_status) goto out;
+      mcp23018_status = i2c_writeReg(
+          I2C_ADDR_WRITE,
+          GPIOA_,
+          (uint8_t[]){0xFF & ~(1 << row)},
+          1,
+          ERGODOX_EZ_I2C_TIMEOUT
+      );
       i2c_stop();
     }
   } else {
